@@ -76,16 +76,34 @@ impl<Head, Tail> Split<Head> for (Head, Tail) {
     }
 }
 
-impl<Head> Split<Head> for (Head,) {
-    type Rest = ();
+impl Split<()> for () {
+    type Rest = Option<()>;
 
-    fn split(self) -> (Option<Head>, Self::Rest) {
-        (None, ())
+    fn split(self) -> (Option<()>, Self::Rest) {
+        (None, None)
     }
 }
 
-trait Next<A> {
-    type NewSelf;
+#[cfg(test)]
+mod split {
+    use super::*;
 
-    fn next(self) -> A;
+    #[test]
+    fn returns_some_head_and_rest() {
+        let ttuple = (1, ('a', ()));
+        let (head, rest) = ttuple.split();
+
+        assert_eq!(head, Some(1));
+        assert_eq!(rest, ('a', ()));
+    }
+
+    #[test]
+    fn returns_none_none_when_head_is_end_of_ttuple() {
+        let ttuple = (1, ());
+        let (_, last) = ttuple.split();
+        let (head, rest) = last.split();
+
+        assert_eq!(head, None);
+        assert_eq!(rest, None);
+    }
 }
